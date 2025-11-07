@@ -1,0 +1,26 @@
+[
+{
+  "directory": "/home/user/stm32_pm2025",
+  "command": "arm-none-eabi-gcc -DSTM32F103C8 -DSTM32F10X_MD -I/home/user/stm32_pm2025/cmsis -I/home/user/stm32_pm2025/stm32 -mcpu=cortex-m3 -mthumb -std=c99 -fdata-sections -ffunction-sections -mlittle-endian -g3 -fno-move-loop-invariants -fsigned-char -ffreestanding -o CMakeFiles/stm32_template.dir/stm32/startup/startup_stm32f10x_md.c.obj -c /home/user/stm32_pm2025/stm32/startup/startup_stm32f10x_md.c",
+  "file": "/home/user/stm32_pm2025/stm32/startup/startup_stm32f10x_md.c",
+  "output": "CMakeFiles/stm32_template.dir/stm32/startup/startup_stm32f10x_md.c.obj"
+},
+{
+  "directory": "/home/user/stm32_pm2025",
+  "command": "arm-none-eabi-gcc -DSTM32F103C8 -DSTM32F10X_MD -I/home/user/stm32_pm2025/cmsis -I/home/user/stm32_pm2025/stm32 -mcpu=cortex-m3 -mthumb -std=c99 -fdata-sections -ffunction-sections -mlittle-endian -g3 -fno-move-loop-invariants -fsigned-char -ffreestanding -o CMakeFiles/stm32_template.dir/stm32/system_stm32f10x.c.obj -c /home/user/stm32_pm2025/stm32/system_stm32f10x.c",
+  "file": "/home/user/stm32_pm2025/stm32/system_stm32f10x.c",
+  "output": "CMakeFiles/stm32_template.dir/stm32/system_stm32f10x.c.obj"
+},
+{
+  "directory": "/home/user/stm32_pm2025",
+  "command": "arm-none-eabi-gcc -DSTM32F103C8 -DSTM32F10X_MD -I/home/user/stm32_pm2025/cmsis -I/home/user/stm32_pm2025/stm32 -mcpu=cortex-m3 -mthumb -std=c99 -fdata-sections -ffunction-sections -mlittle-endian -g3 -fno-move-loop-invariants -fsigned-char -ffreestanding -o CMakeFiles/stm32_template.dir/syscalls/syscalls.c.obj -c /home/user/stm32_pm2025/syscalls/syscalls.c",
+  "file": "/home/user/stm32_pm2025/syscalls/syscalls.c",
+  "output": "CMakeFiles/stm32_template.dir/syscalls/syscalls.c.obj"
+},
+{
+  "directory": "/home/user/stm32_pm2025",
+  "command": "arm-none-eabi-gcc -DSTM32F103C8 -DSTM32F10X_MD -I/home/user/stm32_pm2025/cmsis -I/home/user/stm32_pm2025/stm32 -mcpu=cortex-m3 -mthumb -std=c99 -fdata-sections -ffunction-sections -mlittle-endian -g3 -fno-move-loop-invariants -fsigned-char -ffreestanding -o CMakeFiles/stm32_template.dir/main.c.obj -c /home/user/stm32_pm2025/main.c",
+  "file": "/home/user/stm32_pm2025/main.c",
+  "output": "CMakeFiles/stm32_template.dir/main.c.obj"
+}
+]
