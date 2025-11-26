@@ -14,7 +14,7 @@ set(OBJCOPY ${ARM_TOOLCHAIN_PATH}arm-none-eabi-objcopy)
 set(STFLASH st-flash)
 
 set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
-set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/build)
+set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR})
 set(CMAKE_EXECUTABLE_SUFFIX ".elf")
 
 set(CMAKE_C_FLAGS "-mcpu=cortex-m3 -mthumb -std=c99")

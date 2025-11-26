@@ -1,53 +1,122 @@
 #include <stm32f10x.h>
-#include <stdint.h>
 
-volatile uint32_t sysTick_ms = 0;
+/*Пины подключения дисплея SSD1306
+PA5 -> CLK
+PA7 -> DIN
+PA4 -> CE
+PA1 - > DC
+PA2 -> RST
+*/
 
-void SysTick_Handler(void){
-    sysTick_ms ++;
+void delay(uint32_t ticks){
+    for (uint32_t i = 0; i < ticks; i++){
+        __NOP();
+    }
 }
 
-void delay_ms(uint32_t ms){
-    uint32_t start = sysTick_ms;
-    while ((sysTick_ms - start) < ms);
+void delay_us(uint32_t us){
+    delay(us * 8);
 }
 
-void SysTick_Init(void){
-    SystemCoreClockUpdate();
-    SysTick_Config(SystemCoreClock / 1000);
+void SPI_Write(uint8_t data){
+    while(!(SPI1->SR & SPI_SR_TXE));
+    SPI1->DR = data;
+}
+
+void display_cmd(uint8_t cmd){
+    GPIOA->ODR &= ~GPIO_ODR_ODR4;
+    GPIOA->ODR &= ~GPIO_ODR_ODR1;
+    delay_us(1);
+    SPI_Write(cmd);
+    while (SPI1->SR & SPI_SR_BSY);
+    GPIOA->ODR |= GPIO_ODR_ODR4;
+}
+
+void display_data(uint8_t data){
+    GPIOA->ODR &= ~GPIO_ODR_ODR4;
+    GPIOA->ODR |= GPIO_ODR_ODR1;
+    delay_us(1);
+    SPI_Write(data);
+    while (SPI1->SR & SPI_SR_BSY);
+    GPIOA->ODR |= GPIO_ODR_ODR4;
+}
+
+void display_reset(void){
+    GPIOA->ODR |= GPIO_ODR_ODR2;
+    delay_us(10);
+    GPIOA->ODR &= ~GPIO_ODR_ODR2;
+    delay_us(3);
+    GPIOA->ODR |= GPIO_ODR_ODR2;
+    delay_us(3);
+}
+
+void display_init(void){
+    display_reset();
+    display_cmd(0xAE);
+    display_cmd(0x20);
+    display_cmd(0x00);
+    display_cmd(0xA8);
+    display_cmd(0x3F);
+    display_cmd(0xD3);
+    display_cmd(0x00);
+    display_cmd(0x40);
+    display_cmd(0xA1);
+    display_cmd(0xC8);
+    display_cmd(0xDA);
+    display_cmd(0x12);
+    display_cmd(0x81);
+    display_cmd(0x7F);
+    display_cmd(0xA4);
+    display_cmd(0xA6);
+    display_cmd(0xD5);
+    display_cmd(0x80);
+    display_cmd(0x8D);
+    display_cmd(0x14);
+    display_cmd(0xAF);
+    delay_us(100000);
+}
+
+void display_test_pattern(void){
+    for (uint16_t i = 0; i < 512; i++){
+        display_data(0xFF);
+    }
+    for (uint16_t i = 0; i < 512; i++){
+        display_data(0x00);
+    }
 }
 
 int main(void){
-    RCC->APB2ENR |= RCC_APB2ENR_IOPCEN;
-    GPIOC->CRH &= ~(GPIO_CRH_CNF13 | GPIO_CRH_MODE13);
-    GPIOC->CRH |= GPIO_CRH_MODE13_0;
-    GPIOC->CRH &= ~(GPIO_CRH_CNF14 | GPIO_CRH_MODE14 | GPIO_CRH_CNF15 | GPIO_CRH_MODE15);
-    GPIOC->CRH |= (GPIO_CRH_CNF14_1 | GPIO_CRH_CNF15_1);
-    GPIOC->ODR |= GPIO_ODR_ODR14 | GPIO_ODR_ODR15;
-    SysTick_Init();
-    delay_ms(100);
-    if (!(GPIOC->IDR & GPIO_IDR_IDR14)) while (!(GPIOC->IDR & GPIO_IDR_IDR14));
-    if (!(GPIOC->IDR & GPIO_IDR_IDR15)) while (!(GPIOC->IDR & GPIO_IDR_IDR15));
-    uint32_t base_delay = 500;
-    uint32_t freq_factor = 64;
-    uint32_t max_factor = 64 * 64;
-    uint32_t min_factor = 1;
+    RCC -> APB2ENR |= RCC_APB2ENR_AFIOEN;
+    RCC -> APB2ENR |= RCC_APB2ENR_IOPAEN;
+    RCC -> APB2ENR |= RCC_APB2ENR_IOPCEN;
+    RCC -> APB2ENR |= RCC_APB2ENR_SPI1EN;
+    GPIOC -> CRH &= ~(GPIO_CRH_CNF13 | GPIO_CRH_MODE13);
+    GPIOC -> CRH |= GPIO_CRH_MODE13_1;
+    GPIOA -> CRL &= ~(GPIO_CRL_CNF5 | GPIO_CRL_MODE5);
+    GPIOA -> CRL |= GPIO_CRL_CNF5_1 | GPIO_CRL_MODE5;
+    GPIOA -> CRL &= ~(GPIO_CRL_CNF7 | GPIO_CRL_MODE7);
+    GPIOA -> CRL |= GPIO_CRL_CNF7_1 | GPIO_CRL_MODE7;
+    GPIOA -> CRL &= ~(GPIO_CRL_CNF4 | GPIO_CRL_MODE4);
+    GPIOA -> CRL |= GPIO_CRL_MODE4;
+    GPIOA -> ODR |= GPIO_ODR_ODR4;
+    GPIOA -> CRL &= ~(GPIO_CRL_CNF1 | GPIO_CRL_MODE1);
+    GPIOA -> CRL |= GPIO_CRL_MODE1;
+    GPIOA -> CRL &= ~(GPIO_CRL_CNF2 | GPIO_CRL_MODE2);
+    GPIOA -> CRL |= GPIO_CRL_MODE2;
+    GPIOA -> ODR |= GPIO_ODR_ODR2;
+    SPI1 -> CR1 = 0;
+    SPI1 -> CR1 = 0;
+    SPI1 -> CR1 |= SPI_CR1_CPOL
+    | SPI_CR1_CPHA
+    | SPI_CR1_MSTR
+    | SPI_CR1_BR
+    | SPI_CR1_SSM
+    | SPI_CR1_SSI;
+    SPI1 -> CR1 |= SPI_CR1_SPE;
+    display_init();
+    display_test_pattern();
     while(1){
-        if (!(GPIOC->IDR & GPIO_IDR_IDR14)){
-            delay_ms(50);
-            if (!(GPIOC->IDR & GPIO_IDR_IDR14)){
-                if (freq_factor < max_factor) freq_factor *= 2;
-                while (!(GPIOC->IDR & GPIO_IDR_IDR14));
-            }
-        }
-        if (!(GPIOC->IDR & GPIO_IDR_IDR15)){
-            delay_ms(50);
-            if (!(GPIOC->IDR & GPIO_IDR_IDR15)){
-                if (freq_factor > min_factor) freq_factor /= 2;
-                while (!(GPIOC->IDR & GPIO_IDR_IDR15));
-            }
-        }
-        GPIOC->ODR ^= GPIO_ODR_ODR13;
-        delay_ms((base_delay * 64)  / freq_factor);
+        GPIOC -> ODR ^= GPIO_ODR_ODR13;
+        delay(1000000);
     }
 }
