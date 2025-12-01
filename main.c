@@ -18,16 +18,34 @@ void delay_us(uint32_t us){
     delay(us * 8);
 }
 
-void SPI_Write(uint8_t data){
+void SPI1_Init(void){
+    RCC->APB2ENR |= RCC_APB2ENR_SPI1EN;
+    SPI1->CR1 = 0;
+    SPI1->CR1 |= SPI_CR1_CPOL
+            | SPI_CR1_CPHA
+            | SPI_CR1_MSTR
+            | SPI_CR1_BR
+            | SPI_CR1_SSM
+            | SPI_CR1_SSI;
+    SPI1->CR1 |= SPI_CR1_SPE;
+}
+
+void SPI1_Write(uint8_t data){
     while(!(SPI1->SR & SPI_SR_TXE));
     SPI1->DR = data;
+}
+
+uint8_t SPI1_Read(void){
+    SPI1->DR = 0;
+    while (!(SPI1->SR & SPI_SR_RXNE));
+    return SPI1->DR;
 }
 
 void display_cmd(uint8_t cmd){
     GPIOA->ODR &= ~GPIO_ODR_ODR4;
     GPIOA->ODR &= ~GPIO_ODR_ODR1;
     delay_us(1);
-    SPI_Write(cmd);
+    SPI1_Write(cmd);
     while (SPI1->SR & SPI_SR_BSY);
     GPIOA->ODR |= GPIO_ODR_ODR4;
 }
@@ -36,7 +54,7 @@ void display_data(uint8_t data){
     GPIOA->ODR &= ~GPIO_ODR_ODR4;
     GPIOA->ODR |= GPIO_ODR_ODR1;
     delay_us(1);
-    SPI_Write(data);
+    SPI1_Write(data);
     while (SPI1->SR & SPI_SR_BSY);
     GPIOA->ODR |= GPIO_ODR_ODR4;
 }
@@ -77,11 +95,15 @@ void display_init(void){
 }
 
 void display_test_pattern(void){
-    for (uint16_t i = 0; i < 512; i++){
-        display_data(0xFF);
-    }
-    for (uint16_t i = 0; i < 512; i++){
-        display_data(0x00);
+    for (uint16_t page = 0; page < 8; page ++){
+        for (uint16_t col = 0; col < 128; col++){
+            if (((col / 8) % 2) == (page % 2)){
+                display_data(0xFF);
+            }
+            else{
+                display_data(0x00);
+            }
+        }
     }
 }
 
@@ -89,7 +111,6 @@ int main(void){
     RCC -> APB2ENR |= RCC_APB2ENR_AFIOEN;
     RCC -> APB2ENR |= RCC_APB2ENR_IOPAEN;
     RCC -> APB2ENR |= RCC_APB2ENR_IOPCEN;
-    RCC -> APB2ENR |= RCC_APB2ENR_SPI1EN;
     GPIOC -> CRH &= ~(GPIO_CRH_CNF13 | GPIO_CRH_MODE13);
     GPIOC -> CRH |= GPIO_CRH_MODE13_1;
     GPIOA -> CRL &= ~(GPIO_CRL_CNF5 | GPIO_CRL_MODE5);
@@ -104,15 +125,8 @@ int main(void){
     GPIOA -> CRL &= ~(GPIO_CRL_CNF2 | GPIO_CRL_MODE2);
     GPIOA -> CRL |= GPIO_CRL_MODE2;
     GPIOA -> ODR |= GPIO_ODR_ODR2;
-    SPI1 -> CR1 = 0;
-    SPI1 -> CR1 = 0;
-    SPI1 -> CR1 |= SPI_CR1_CPOL
-    | SPI_CR1_CPHA
-    | SPI_CR1_MSTR
-    | SPI_CR1_BR
-    | SPI_CR1_SSM
-    | SPI_CR1_SSI;
-    SPI1 -> CR1 |= SPI_CR1_SPE;
+   
+    SPI1_Init();
     display_init();
     display_test_pattern();
     while(1){
